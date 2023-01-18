@@ -89,7 +89,7 @@ export const getThreadsByCategoryId = async (
             messages: ["Nie udało się znaleźć wątków w podanej kategorii."],
         };
     }
-    console.log(threads);
+
     return {
         entities: threads,
     };

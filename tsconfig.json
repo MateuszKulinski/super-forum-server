@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES6",
     "module": "commonjs",
-    "lib": ["dom", "ES6", "ES2017", "esnext.asynciterable"],
+    "lib": ["dom", "ES6", "ES2017", "es2020", "esnext.asynciterable"],
     "sourceMap": true,
     "outDir": "./dist",
     "moduleResolution": "node",
