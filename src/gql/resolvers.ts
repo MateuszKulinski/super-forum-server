@@ -4,14 +4,30 @@ import {
     createThread,
     getThreadById,
     getThreadsByCategoryId,
+    getThreadsLatest,
 } from "../repo/ThreadRepo";
 import { Thread } from "../repo/Thread";
 import { QueryArrayResult, QueryOneResult } from "../repo/QueryArrayResult";
 import { updateThreadPoint } from "../repo/ThreadPointRepo";
 import { ThreadItem } from "../repo/ThreadItem";
-import { createThreadItem } from "../repo/ThreadItemRepo";
+import {
+    createThreadItem,
+    getThreadItemsByThreadId,
+} from "../repo/ThreadItemRepo";
 import { updateThreadItemPoint } from "../repo/ThreadItemPointRepo";
-import { login, logout, register, UserResult } from "../repo/UserRepo";
+import {
+    changePassword,
+    login,
+    logout,
+    me,
+    register,
+    UserResult,
+} from "../repo/UserRepo";
+import { User } from "../repo/User";
+import { getAllCategories } from "../repo/ThreadCategoryRepo";
+import { ThreadCategory } from "../repo/ThreadCategory";
+import { getTopCategoryThread } from "../repo/CategoryThreadRepo";
+import CategoryThread from "../repo/CategoryThread";
 
 interface EntityResult {
     messages: Array<string>;
@@ -109,6 +125,111 @@ const resolvers: IResolvers = {
                         ? threads.messages
                         : ["Wystąpił błąd"],
                 };
+            } catch (ex) {
+                console.log(ex.message);
+                throw ex;
+            }
+        },
+
+        getThreadsLatest: async (
+            obj: any,
+            args: null,
+            ctx: GqlContext,
+            info: any
+        ): Promise<{ threads: Array<Thread> } | EntityResult> => {
+            let threads: QueryArrayResult<Thread>;
+            try {
+                threads = await getThreadsLatest();
+                if (threads.entities) {
+                    return {
+                        threads: threads.entities,
+                    };
+                }
+                return {
+                    messages: threads.messages
+                        ? threads.messages
+                        : [STANDARD_ERROR],
+                };
+            } catch (ex) {
+                throw ex;
+            }
+        },
+        getThreadItemByThreadId: async (
+            obj: any,
+            args: { threadId: string },
+            ctx: GqlContext,
+            info: any
+        ): Promise<{ threadItems: Array<ThreadItem> } | EntityResult> => {
+            let threadItems: QueryArrayResult<ThreadItem>;
+            try {
+                threadItems = await getThreadItemsByThreadId(args.threadId);
+                if (threadItems.entities) {
+                    return {
+                        threadItems: threadItems.entities,
+                    };
+                }
+                return {
+                    messages: threadItems.messages
+                        ? threadItems.messages
+                        : [STANDARD_ERROR],
+                };
+            } catch (ex) {
+                throw ex;
+            }
+        },
+        getAllCategories: async (
+            obj: any,
+            args: null,
+            ctx: GqlContext,
+            info: any
+        ): Promise<Array<ThreadCategory> | EntityResult> => {
+            let categories: QueryArrayResult<ThreadCategory>;
+            try {
+                categories = await getAllCategories();
+                if (categories.entities) {
+                    return categories.entities;
+                }
+                return {
+                    messages: categories.messages
+                        ? categories.messages
+                        : [STANDARD_ERROR],
+                };
+            } catch (ex) {
+                throw ex;
+            }
+        },
+        me: async (
+            obj: any,
+            args: null,
+            ctx: GqlContext,
+            info: any
+        ): Promise<User | EntityResult> => {
+            let user: UserResult;
+            try {
+                if (!ctx.req.session?.userId) {
+                    return {
+                        messages: ["User not logged in."],
+                    };
+                }
+                user = await me(ctx.req.session.userId);
+                if (user && user.user) {
+                    return user.user;
+                }
+                return {
+                    messages: user.messages ? user.messages : [STANDARD_ERROR],
+                };
+            } catch (ex) {
+                throw ex;
+            }
+        },
+        getTopCategoryThread: async (
+            obj: any,
+            args: null,
+            ctx: GqlContext,
+            info: any
+        ): Promise<Array<CategoryThread>> => {
+            try {
+                return await getTopCategoryThread();
             } catch (ex) {
                 console.log(ex.message);
                 throw ex;
@@ -241,7 +362,6 @@ const resolvers: IResolvers = {
             try {
                 user = await login(args.userName, args.password);
                 if (user && user.user) {
-                    console.log(ctx.req.session);
                     ctx.req.session!.userId = user.user.id;
 
                     return `Login successful for userId ${
@@ -252,7 +372,6 @@ const resolvers: IResolvers = {
                     ? user.messages[0]
                     : STANDARD_ERROR;
             } catch (ex) {
-                console.log(ex.message);
                 throw ex;
             }
         },
@@ -271,6 +390,26 @@ const resolvers: IResolvers = {
                     }
                     console.log("session destroyed", ctx.req.session?.userId);
                 });
+                return result;
+            } catch (ex) {
+                throw ex;
+            }
+        },
+        changePassword: async (
+            obj: any,
+            args: { newPassword: string },
+            ctx: GqlContext,
+            info: any
+        ): Promise<string> => {
+            try {
+                if (!ctx.req.session || !ctx.req.session!.userId) {
+                    return "You must be logged in before you can change your password.";
+                }
+                let result = await changePassword(
+                    ctx.req.session!.userId,
+                    args.newPassword
+                );
+
                 return result;
             } catch (ex) {
                 throw ex;

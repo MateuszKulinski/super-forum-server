@@ -4,6 +4,7 @@ import { Thread } from "./Thread";
 import { ThreadPoint } from "./ThreadPoints";
 import { ThreadItemPoint } from "./ThreadItemPoint";
 import { Auditable } from "./Auditable";
+import { ThreadItem } from "./ThreadItem";
 
 @Entity({ name: "Users" })
 export class User extends Auditable {
@@ -44,4 +45,7 @@ export class User extends Auditable {
 
     @OneToMany(() => ThreadItemPoint, (threadItemPoint) => threadItemPoint.user)
     threadItemPoints: ThreadItemPoint[];
+
+    @OneToMany(() => ThreadItem, (threadItem) => threadItem.user)
+    threadItems: ThreadItem[];
 }

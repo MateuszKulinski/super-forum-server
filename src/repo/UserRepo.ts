@@ -91,6 +91,58 @@ export const logout = async (userName: string): Promise<string> => {
     return "Użytkownik został wylogowany.";
 };
 
+export const me = async (id: string): Promise<UserResult> => {
+    const user = await User.findOne({
+        where: { id },
+        relations: [
+            "threads",
+            "threads.threadItems",
+            "threadItems",
+            "threadItems.thread",
+        ],
+    });
+    if (!user) {
+        return {
+            messages: ["Nie znaleziono użytkownika."],
+        };
+    }
+
+    if (!user.confirmed) {
+        return {
+            messages: [
+                "Użytkownij jeszcze nie potwierdził swojego adresu e-mail.",
+            ],
+        };
+    }
+
+    user.password = "";
+    return {
+        user: user,
+    };
+};
+
+export const changePassword = async (
+    id: string,
+    newPassword: string
+): Promise<string> => {
+    const user = await User.findOne({
+        where: { id },
+    });
+
+    if (!user) {
+        return "Użytkownik nie znaleziony.";
+    }
+
+    if (!user.confirmed) {
+        return "Użytkownik nie potwierdził adresu e-mail.";
+    }
+
+    const salt = await bcrypt.genSalt(saltRounds);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    user.password = hashedPassword;
+    user.save();
+    return "Hasło zostało zmienione.";
+};
 function userNotFound(userName: string) {
     return `Nie udało się znaleźć użytkownika o nazwie "${userName}".`;
 }

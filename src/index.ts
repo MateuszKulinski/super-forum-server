@@ -17,12 +17,12 @@ import { json } from "body-parser";
 const main = async () => {
     const app = express();
     console.log("client url", process.env.CLIENT_URL);
-    app.use(
-        cors({
-            credentials: true,
-            origin: process.env.CLIENT_URL,
-        })
-    );
+    // app.use(
+    //     cors({
+    //         credentials: true,
+    //         origin: process.env.CLIENT_URL,
+    //     })
+    // );
     const router = express.Router();
 
     await createConnection();
@@ -59,11 +59,14 @@ const main = async () => {
         typeDefs,
         resolvers,
     });
-
+    console.log(process.env.CLIENT_URL);
     await apolloServer.start();
     app.use(
         "/graphql",
-        cors<cors.CorsRequest>(),
+        cors<cors.CorsRequest>({
+            credentials: true,
+            origin: process.env.CLIENT_URL,
+        }),
         json(),
         expressMiddleware(apolloServer, {
             context: async ({ req, res }: any) => ({ req, res }),

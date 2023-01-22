@@ -30,12 +30,14 @@ export const updateThreadPoint = async (
         },
         relations: ["thread"],
     });
+    console.log(existingPoint);
     await getManager().transaction(async (transationEntityManager) => {
         if (existingPoint) {
             if (increment) {
                 if (existingPoint.isDecrement) {
                     await ThreadPoint.remove(existingPoint);
                     thread!.points = Number(thread!.points) + 1;
+                    console.log(thread!.points);
                     thread!.lastModifiedOn = new Date();
                     await thread!.save();
                 }
