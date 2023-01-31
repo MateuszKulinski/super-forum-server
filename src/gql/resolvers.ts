@@ -321,7 +321,7 @@ const resolvers: IResolvers = {
             let result = "";
             try {
                 if (!ctx.req || !ctx.req.session || !ctx.req.session?.userId) {
-                    return "You must be logged in to set likes.";
+                    return "Musisz być zalogowany.";
                 }
                 result = await updateThreadItemPoint(
                     ctx.req.session!.userId,

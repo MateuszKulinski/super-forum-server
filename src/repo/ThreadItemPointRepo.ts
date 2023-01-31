@@ -8,24 +8,15 @@ export const updateThreadItemPoint = async (
     threadItemId: string,
     increment: boolean
 ): Promise<string> => {
-    if (!userId || userId === "0") {
-        return "User is not authenticated";
-    }
-
-    let message = "Failed to increment thread item point";
+    if (!userId || userId === "0") return "Użytkownik niezalogowany";
+    let message = "Nie udało się inkrementować liczby punktów wątku";
     const threadItem = await ThreadItem.findOne({
         where: { id: threadItemId },
         relations: ["user"],
     });
-    console.log(
-        "threadItemId, userId, threadItem!.user!.id",
-        threadItemId,
-        userId,
-        threadItem!.user!.id
-    );
+
     if (threadItem!.user!.id === userId) {
-        message = "Error: users cannot increment their own thread item";
-        console.log("incThreadItemPoints", message);
+        message = "Błąd. Użytkownik nie może oceniać swojego wątku.";
         return message;
     }
     const user = await User.findOne({ where: { id: userId } });
@@ -37,14 +28,10 @@ export const updateThreadItemPoint = async (
         },
         relations: ["threadItem"],
     });
-
     await getManager().transaction(async (transactionEntityManager) => {
         if (existingPoint) {
-            console.log("existingPoint");
             if (increment) {
-                console.log("increment");
                 if (existingPoint.isDecrement) {
-                    console.log("remove dec");
                     await ThreadItemPoint.remove(existingPoint);
                     threadItem!.points = Number(threadItem!.points) + 1;
                     threadItem!.lastModifiedOn = new Date();
@@ -52,7 +39,6 @@ export const updateThreadItemPoint = async (
                 }
             } else {
                 if (!existingPoint.isDecrement) {
-                    console.log("remove inc");
                     await ThreadItemPoint.remove(existingPoint);
                     threadItem!.points = Number(threadItem!.points) - 1;
                     threadItem!.lastModifiedOn = new Date();
@@ -60,7 +46,6 @@ export const updateThreadItemPoint = async (
                 }
             }
         } else {
-            console.log("new threadItem point");
             await ThreadItemPoint.create({
                 threadItem,
                 isDecrement: !increment,
@@ -75,9 +60,7 @@ export const updateThreadItemPoint = async (
             await threadItem!.save();
         }
 
-        message = `Successfully ${
-            increment ? "incremented" : "decremented"
-        } point.`;
+        message = `Pomyślnie ${increment ? "dodano" : "odjęto"} punkt.`;
     });
 
     return message;

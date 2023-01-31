@@ -8,7 +8,7 @@ export const updateThreadPoint = async (
     threadId: string,
     increment: boolean
 ): Promise<string> => {
-    if (!userId || userId === "0") return "User is not authenticated";
+    if (!userId || userId === "0") return "Użytkownik niezalogowany";
     let message = "Nie udało się inkrementować liczby punktów wątku";
     const thread = await Thread.findOne({
         where: { id: threadId },
@@ -17,7 +17,6 @@ export const updateThreadPoint = async (
 
     if (thread!.user!.id === userId) {
         message = "Błąd. Użytkownik nie może oceniać swojego wątku.";
-        console.log("incThreadPoints", message);
         return message;
     }
     const user = await User.findOne({
@@ -30,19 +29,20 @@ export const updateThreadPoint = async (
         },
         relations: ["thread"],
     });
-    console.log(existingPoint);
-    await getManager().transaction(async (transationEntityManager) => {
+    console.log("TEST");
+    await getManager().transaction(async (transactionEntityManager) => {
         if (existingPoint) {
             if (increment) {
                 if (existingPoint.isDecrement) {
+                    console.log("remove dec");
                     await ThreadPoint.remove(existingPoint);
                     thread!.points = Number(thread!.points) + 1;
-                    console.log(thread!.points);
                     thread!.lastModifiedOn = new Date();
                     await thread!.save();
                 }
             } else {
                 if (!existingPoint.isDecrement) {
+                    console.log("remove inc");
                     await ThreadPoint.remove(existingPoint);
                     thread!.points = Number(thread!.points) - 1;
                     thread!.lastModifiedOn = new Date();
@@ -50,6 +50,7 @@ export const updateThreadPoint = async (
                 }
             }
         } else {
+            console.log("new point");
             await ThreadPoint.create({
                 thread,
                 isDecrement: !increment,

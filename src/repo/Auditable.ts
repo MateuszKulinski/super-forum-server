@@ -9,7 +9,7 @@ export class Auditable extends BaseEntity {
     })
     createdBy: string;
 
-    @Column("time with time zone", {
+    @Column("timestamp with time zone", {
         name: "CreatedOn",
         default: () => `now()`,
         nullable: false,
@@ -24,7 +24,7 @@ export class Auditable extends BaseEntity {
     })
     lastModifiedBy: string;
 
-    @Column("time with time zone", {
+    @Column("timestamp with time zone", {
         name: "LastModifiedOn",
         default: () => `now()`,
         nullable: false,

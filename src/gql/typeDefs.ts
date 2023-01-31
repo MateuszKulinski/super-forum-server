@@ -124,7 +124,7 @@ const typeDefs = `#graphql
         register(email: String!, userName: String!, password: String!): String!
         login(userName: String!, password: String!): String!
         logout(userName: String!): String!
-        updateThreadPoint(userId: ID!,threadId: ID!, increment: Boolean!): String!
+        updateThreadPoint(threadId: ID!, increment: Boolean!): String!
         updateThreadItemPoint(threadItemId: ID!, increment: Boolean!): String!
         changePassword(newPassword: String!): String!
     }
