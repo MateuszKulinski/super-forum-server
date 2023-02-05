@@ -56,7 +56,7 @@ export const createThread = async (
     }
 
     return {
-        messages: ["Wątek został pomyślnie utworzony."],
+        messages: [thread.id],
     };
 };
 
@@ -67,7 +67,13 @@ export const getThreadById = async (
         where: {
             id,
         },
-        relations: ["user", "threadItems", "threadItems.user", "category"],
+        relations: [
+            "user",
+            "threadItems",
+            "threadItems.user",
+            "threadItems.thread",
+            "category",
+        ],
     });
     if (!thread) {
         return {

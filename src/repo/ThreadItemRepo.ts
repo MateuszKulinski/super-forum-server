@@ -19,7 +19,7 @@ export const createThreadItem = async (
     // users must be logged in to post
     if (!userId) {
         return {
-            messages: ["User not logged in."],
+            messages: ["Użytkownik nie jest zalogowany."],
         };
     }
     const user = await User.findOne({
@@ -31,7 +31,7 @@ export const createThreadItem = async (
     });
     if (!thread) {
         return {
-            messages: ["Thread not found."],
+            messages: ["Nie znaleziono wątku."],
         };
     }
     const threadItem = await ThreadItem.create({
@@ -41,12 +41,12 @@ export const createThreadItem = async (
     }).save();
     if (!threadItem) {
         return {
-            messages: ["Failed to create ThreadItem."],
+            messages: ["Nie udało się utworzyć odpowiedzi (ThreadItem)."],
         };
     }
 
     return {
-        messages: ["ThreadItem created successfully."],
+        messages: [`${threadItem.id}`],
     };
 };
 
@@ -61,7 +61,7 @@ export const getThreadItemsByThreadId = async (
 
     if (!threadItems) {
         return {
-            messages: ["ThreadItems of thread not found."],
+            messages: ["Nie znaleziono odpowiedzi (ThreadItem) do wątku."],
         };
     }
     console.log(threadItems);
